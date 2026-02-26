@@ -1,5 +1,6 @@
 export type MessageCategory = 'Normal' | 'Spam' | 'Harassment' | 'Scam' | 'Promotional';
 export type MessageAction = 'Allow' | 'Warn' | 'Block' | 'Report';
+export type ThreatLevel = 'Low' | 'Medium' | 'High' | 'Critical';
 export type Screen = 'onboarding' | 'login' | 'home' | 'reports' | 'settings' | 'notifications' | 'category-detail';
 
 export interface Message {
@@ -8,6 +9,7 @@ export interface Message {
   category: MessageCategory;
   confidence: number;
   flaggedPatterns: string[];
+  threatLevel: ThreatLevel;
   action: MessageAction | null;
   timestamp: string;
 }
@@ -22,4 +24,5 @@ export interface ClassifyResponse {
   category: MessageCategory;
   confidence: number;
   flagged_patterns: string[];
+  threat_level: ThreatLevel;
 }

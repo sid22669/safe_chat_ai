@@ -1,6 +1,6 @@
 import React from 'react';
 import { Bell, Ban, AlertTriangle, Flag, Megaphone, CheckCircle } from 'lucide-react';
-import type { Message } from '../types';
+import type { Message, ThreatLevel } from '../types';
 
 interface NotificationsPageProps {
   messages: Message[];
@@ -40,6 +40,22 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ messages }) => {
       default:
         return 'border-l-gray-500';
     }
+  };
+
+  const getThreatBadge = (level: ThreatLevel) => {
+    const styles: Record<ThreatLevel, { bg: string; text: string; dot: string }> = {
+      Low: { bg: 'bg-green-100', text: 'text-green-700', dot: 'bg-green-500' },
+      Medium: { bg: 'bg-yellow-100', text: 'text-yellow-700', dot: 'bg-yellow-500' },
+      High: { bg: 'bg-orange-100', text: 'text-orange-700', dot: 'bg-orange-500' },
+      Critical: { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' },
+    };
+    const s = styles[level];
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 ${s.bg} ${s.text} rounded-full text-xs font-semibold`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${s.dot} ${level === 'Critical' ? 'animate-pulse' : ''}`} />
+        {level}
+      </span>
+    );
   };
 
   // Truncate message content
@@ -91,9 +107,12 @@ const NotificationsPage: React.FC<NotificationsPageProps> = ({ messages }) => {
                     {alert.category}
                   </span>
                 </div>
-                <span className="text-sm font-medium text-gray-600">
-                  {Math.round(alert.confidence * 100)}%
-                </span>
+                <div className="flex items-center gap-2">
+                  {alert.threatLevel && getThreatBadge(alert.threatLevel)}
+                  <span className="text-sm font-medium text-gray-600">
+                    {Math.round(alert.confidence * 100)}%
+                  </span>
+                </div>
               </div>
 
               {/* Message content */}

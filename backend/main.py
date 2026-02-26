@@ -8,7 +8,10 @@ app = FastAPI(title="SafeChat AI API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "https://safe-chat-ai.sidai.in",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -25,6 +28,27 @@ class ClassifyResponse(BaseModel):
     category: str
     confidence: float
     flagged_patterns: list[str]
+    threat_level: str
+
+
+def compute_threat_level(category: str, confidence: float, flagged_patterns: list[str]) -> str:
+    """Compute threat level from category, confidence, and pattern count."""
+    if category == "Normal":
+        return "Low"
+
+    # Weight: category severity + confidence + number of flagged patterns
+    severity = {"Spam": 1, "Promotional": 1, "Harassment": 3, "Scam": 3}
+    base = severity.get(category, 1)
+    pattern_bonus = min(len(flagged_patterns) * 0.5, 2.0)
+    score = base * confidence + pattern_bonus
+
+    if score >= 2.5:
+        return "Critical"
+    elif score >= 1.8:
+        return "High"
+    elif score >= 1.0:
+        return "Medium"
+    return "Low"
 
 def preprocess(text: str) -> str:
     text = text.lower()
@@ -78,8 +102,11 @@ def classify(req: ClassifyRequest):
 
     flagged = detect_patterns(req.text)
 
+    threat_level = compute_threat_level(category, confidence, flagged)
+
     return ClassifyResponse(
         category=category,
         confidence=round(confidence, 4),
         flagged_patterns=flagged,
+        threat_level=threat_level,
     )

@@ -1,6 +1,6 @@
 import type { ClassifyResponse } from '../types';
 
-const API_BASE = 'http://localhost:8001/api';
+const API_BASE = '/api';
 
 export async function classifyMessage(text: string): Promise<ClassifyResponse> {
   const res = await fetch(`${API_BASE}/classify`, {

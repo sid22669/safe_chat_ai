@@ -1,5 +1,5 @@
 import { ArrowLeft, Ban, AlertTriangle, Flag, Megaphone, Shield, CheckCircle, AlertCircle } from 'lucide-react';
-import type { Message, MessageCategory, MessageAction } from '../types';
+import type { Message, MessageCategory, MessageAction, ThreatLevel } from '../types';
 
 interface CategoryDetailProps {
   category: MessageCategory;
@@ -7,6 +7,13 @@ interface CategoryDetailProps {
   onBack: () => void;
   onAction: (messageId: string, action: MessageAction) => void;
 }
+
+const threatColors: Record<ThreatLevel, { bg: string; text: string; dot: string }> = {
+  Low: { bg: 'bg-green-100', text: 'text-green-700', dot: 'bg-green-500' },
+  Medium: { bg: 'bg-yellow-100', text: 'text-yellow-700', dot: 'bg-yellow-500' },
+  High: { bg: 'bg-orange-100', text: 'text-orange-700', dot: 'bg-orange-500' },
+  Critical: { bg: 'bg-red-100', text: 'text-red-700', dot: 'bg-red-500' },
+};
 
 const categoryConfig: Record<string, { icon: typeof Shield; gradient: string; description: string }> = {
   Spam: { icon: Ban, gradient: 'from-orange-400 to-orange-600', description: 'Unwanted bulk messages' },
@@ -49,8 +56,19 @@ export function CategoryDetail({ category, messages, onBack, onAction }: Categor
               <div className="bg-slate-50 rounded-xl p-3 mb-3 border border-slate-200">
                 <p className="text-slate-700 text-sm leading-relaxed">{message.content}</p>
               </div>
-              <span className="text-slate-500 text-xs">{new Date(message.timestamp).toLocaleString()}</span>
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 my-3 border border-blue-200">
+              <div className="flex items-center justify-between mt-1 mb-3">
+                <span className="text-slate-500 text-xs">{new Date(message.timestamp).toLocaleString()}</span>
+                {message.threatLevel && (() => {
+                  const tc = threatColors[message.threatLevel];
+                  return (
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 ${tc.bg} ${tc.text} rounded-lg text-xs font-semibold`}>
+                      <span className={`w-2 h-2 rounded-full ${tc.dot} ${message.threatLevel === 'Critical' ? 'animate-pulse' : ''}`} />
+                      {message.threatLevel}
+                    </span>
+                  );
+                })()}
+              </div>
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200">
                 <p className="text-blue-900 text-xs font-medium mb-2">AI Confidence</p>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-blue-200 rounded-full h-2 overflow-hidden">

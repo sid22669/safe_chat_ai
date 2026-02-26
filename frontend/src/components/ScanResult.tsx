@@ -1,14 +1,22 @@
 import { Shield, Ban, AlertTriangle, Flag, Megaphone, CheckCircle, AlertCircle } from 'lucide-react';
-import type { MessageCategory, MessageAction } from '../types';
+import type { MessageCategory, MessageAction, ThreatLevel } from '../types';
 import { useState } from 'react';
 
 interface ScanResultProps {
   category: MessageCategory;
   confidence: number;
   flaggedPatterns: string[];
+  threatLevel: ThreatLevel;
   messageId: string;
   onAction: (messageId: string, action: MessageAction) => void;
 }
+
+const threatLevelConfig: Record<ThreatLevel, { bg: string; text: string; border: string; dot: string }> = {
+  Low: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', dot: 'bg-green-500' },
+  Medium: { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', dot: 'bg-yellow-500' },
+  High: { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', dot: 'bg-orange-500' },
+  Critical: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200', dot: 'bg-red-500' },
+};
 
 const categoryConfig: Record<MessageCategory, { icon: typeof Shield; gradient: string; bg: string; text: string; border: string; label: string }> = {
   Normal: { icon: CheckCircle, gradient: 'from-green-400 to-emerald-600', bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', label: 'Safe Message' },
@@ -18,10 +26,11 @@ const categoryConfig: Record<MessageCategory, { icon: typeof Shield; gradient: s
   Promotional: { icon: Megaphone, gradient: 'from-yellow-400 to-yellow-600', bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', label: 'Promotional Content' },
 };
 
-export function ScanResult({ category, confidence, flaggedPatterns, messageId, onAction }: ScanResultProps) {
+export function ScanResult({ category, confidence, flaggedPatterns, threatLevel, messageId, onAction }: ScanResultProps) {
   const [actionTaken, setActionTaken] = useState<MessageAction | null>(null);
   const config = categoryConfig[category];
   const Icon = config.icon;
+  const threat = threatLevelConfig[threatLevel];
 
   const handleAction = (action: MessageAction) => {
     onAction(messageId, action);
@@ -40,6 +49,14 @@ export function ScanResult({ category, confidence, flaggedPatterns, messageId, o
           <h3 className={`${config.text} font-bold text-lg`}>{config.label}</h3>
           <p className="text-slate-600 text-sm">Category: {category}</p>
         </div>
+      </div>
+
+      <div className={`${threat.bg} border ${threat.border} rounded-xl px-4 py-2.5 flex items-center justify-between`}>
+        <div className="flex items-center gap-2">
+          <span className={`w-2.5 h-2.5 rounded-full ${threat.dot} ${threatLevel === 'Critical' ? 'animate-pulse' : ''}`} />
+          <span className="text-slate-600 text-sm font-medium">Threat Level</span>
+        </div>
+        <span className={`${threat.text} font-bold text-sm`}>{threatLevel}</span>
       </div>
 
       <div>

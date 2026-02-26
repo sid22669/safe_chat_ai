@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { X, ScanSearch, Loader2 } from 'lucide-react';
 import { classifyMessage } from '../lib/api';
 import { ScanResult } from './ScanResult';
-import type { Message, MessageCategory, MessageAction } from '../types';
+import type { Message, MessageCategory, MessageAction, ThreatLevel } from '../types';
 
 interface ScanSheetProps {
   isOpen: boolean;
@@ -19,6 +19,7 @@ export function ScanSheet({ isOpen, onClose, onMessageScanned, onAction }: ScanS
     category: MessageCategory;
     confidence: number;
     flaggedPatterns: string[];
+    threatLevel: ThreatLevel;
     messageId: string;
   } | null>(null);
 
@@ -35,11 +36,13 @@ export function ScanSheet({ isOpen, onClose, onMessageScanned, onAction }: ScanS
         category: response.category,
         confidence: response.confidence,
         flaggedPatterns: response.flagged_patterns,
+        threatLevel: response.threat_level,
       });
       setResult({
         category: response.category,
         confidence: response.confidence,
         flaggedPatterns: response.flagged_patterns,
+        threatLevel: response.threat_level,
         messageId: msg.id,
       });
     } catch {
@@ -121,6 +124,7 @@ export function ScanSheet({ isOpen, onClose, onMessageScanned, onAction }: ScanS
                 category={result.category}
                 confidence={result.confidence}
                 flaggedPatterns={result.flaggedPatterns}
+                threatLevel={result.threatLevel}
                 messageId={result.messageId}
                 onAction={onAction}
               />
